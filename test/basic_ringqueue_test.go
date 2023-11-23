@@ -59,11 +59,18 @@ func TestSafetyRingQueuePushValues_1(t *testing.T) {
 		return
 	}
 
+	queueInst := safetyQueue.GetQueueInstance().(*queue.RingQueue)
+	safetyQueue.ExecutionInstanceReadMethod(func() {
+		if queueInst.CountNonNilValueNum() > 0 {
+			t.Error("There are still non empty elements in the queue")
+			return
+		}
+	})
 }
 
 func TestSafetyRingQueuePushValuesWithException_2(t *testing.T) {
 	ringQueueCapacitySize := 50
-	
+
 	safetyQueue, newQueueErr := queue.NewSafetyRingDeque(func() queue.IRingQueue {
 		return queue.NewRingQueue(ringQueueCapacitySize)
 	})
@@ -93,5 +100,139 @@ func TestSafetyRingQueuePushValuesWithException_2(t *testing.T) {
 		t.Errorf("Exceeding capacity size without throwing an error, %v", err)
 		return
 	}
+
+}
+
+func TestSafetyRingQueuePushValues_3(t *testing.T) {
+	ringQueueCapacitySize := 50
+	ringQueueElemValuesLen := 30
+
+	safetyQueue, newQueueErr := queue.NewSafetyRingDeque(func() queue.IRingQueue {
+		return queue.NewRingQueue(ringQueueCapacitySize)
+	})
+	if newQueueErr != nil {
+		t.Errorf("Failed to create a safety ring queue, %v", newQueueErr)
+		return
+	}
+
+	var elemValues []interface{}
+	for i := 0; i < (ringQueueElemValuesLen - 1); i++ {
+		elemValues = append(elemValues, i)
+	}
+
+	for _, v := range elemValues {
+		if err := safetyQueue.PushValue(v); err != nil {
+			t.Errorf("Failed to push the value to ring queue, %v", err)
+			return
+		}
+	}
+
+	queueInst := safetyQueue.GetQueueInstance().(*queue.RingQueue)
+
+	popListSpace := make([]interface{}, 0, ringQueueElemValuesLen-1)
+	safetyQueue.ExecutionInstanceWriteMethod(func() {
+		poppedCount, popErr := queueInst.PopValuesListSpace(&popListSpace)
+		if popErr != nil {
+			t.Errorf("Failed to pop values to list space, %v", popErr)
+			return
+		}
+		popListSpace = popListSpace[:poppedCount]
+	})
+
+	for idx, v := range popListSpace {
+		if v != elemValues[idx] {
+			t.Error("The pop-up value does not match the result")
+			return
+		}
+	}
+
+	if err := safetyQueue.PushValues(elemValues...); err != nil {
+		t.Errorf("Failed to push the value to ring queue, %v", err)
+		return
+	}
+
+	popListSpace = make([]interface{}, ringQueueElemValuesLen-1)
+	safetyQueue.ExecutionInstanceWriteMethod(func() {
+		poppedCount, popErr := queueInst.PopValuesListSpace(&popListSpace)
+		if popErr != nil {
+			t.Errorf("Failed to pop values to list space, %v", popErr)
+			return
+		}
+		popListSpace = popListSpace[:poppedCount]
+	})
+
+	for idx, v := range popListSpace {
+		if v != elemValues[idx] {
+			t.Error("The pop-up value does not match the result")
+			return
+		}
+	}
+
+	if safetyQueue.GetLength() > 0 {
+		t.Error("Not all queue elements popped up")
+		return
+	}
+
+	safetyQueue.ExecutionInstanceReadMethod(func() {
+		if queueInst.CountNonNilValueNum() > 0 {
+			t.Error("There are still non empty elements in the queue")
+			return
+		}
+	})
+}
+
+func TestSafetyRingQueuePushValues_4(t *testing.T) {
+	ringQueueCapacitySize := 30
+	ringQueueElemValuesLen := ringQueueCapacitySize + 5
+
+	safetyQueue, newQueueErr := queue.NewSafetyRingDeque(func() queue.IRingQueue {
+		return queue.NewRingQueue(ringQueueCapacitySize)
+	})
+	if newQueueErr != nil {
+		t.Errorf("Failed to create a safety ring queue, %v", newQueueErr)
+		return
+	}
+
+	var elemValues []interface{}
+	for i := 0; i < (ringQueueElemValuesLen - 1); i++ {
+		elemValues = append(elemValues, i)
+	}
+
+	queueInst := safetyQueue.GetQueueInstance().(*queue.RingQueue)
+
+	pushedCount := queueInst.PushValuesWithoutCheck(elemValues...)
+	if pushedCount != (ringQueueCapacitySize - 1) {
+		t.Error("The amount of data pushed to the ring queue is incorrect")
+		return
+	}
+
+	popListSpace := make([]interface{}, ringQueueElemValuesLen)
+	safetyQueue.ExecutionInstanceWriteMethod(func() {
+		poppedCount, popErr := queueInst.PopValuesListSpace(&popListSpace)
+		if popErr != nil {
+			t.Errorf("Failed to pop values to list space, %v", popErr)
+			return
+		}
+		popListSpace = popListSpace[:poppedCount]
+	})
+
+	for idx, v := range popListSpace {
+		if v != elemValues[idx] {
+			t.Error("The pop-up value does not match the result")
+			return
+		}
+	}
+
+	if safetyQueue.GetLength() > 0 {
+		t.Error("Not all queue elements popped up")
+		return
+	}
+
+	safetyQueue.ExecutionInstanceReadMethod(func() {
+		if queueInst.CountNonNilValueNum() > 0 {
+			t.Error("There are still non empty elements in the queue")
+			return
+		}
+	})
 
 }

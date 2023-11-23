@@ -12,12 +12,11 @@ type IRingQueue interface {
 	GetAvailableCapacitySize() int
 	PushValue(value interface{}) error
 	PushValues(values ...interface{}) error
-	PushValuesWithCheck(values ...interface{}) (retPushedCount int)
 	PopValue() (interface{}, bool)
 	PopValues(count int) (retValues []interface{})
 }
 
-func NewSafetyRingDeque(newDequeFunc func() IRingQueue) (IRingQueue, error) {
+func NewSafetyRingDeque(newDequeFunc func() IRingQueue) (*SafetyRingQueue, error) {
 	inst := newDequeFunc()
 	if inst == nil {
 		return nil, errors.New("the created ring queue instance is a nil value")
@@ -73,12 +72,6 @@ func (t *SafetyRingQueue) PushValues(values ...interface{}) error {
 	return t.inst.PushValues(values...)
 }
 
-func (t *SafetyRingQueue) PushValuesWithCheck(values ...interface{}) (retPushedCount int) {
-	t.rwMutex.Lock()
-	defer t.rwMutex.Unlock()
-	return t.inst.PushValuesWithCheck(values...)
-}
-
 func (t *SafetyRingQueue) PopValue() (interface{}, bool) {
 	t.rwMutex.Lock()
 	defer t.rwMutex.Unlock()
@@ -91,13 +84,13 @@ func (t *SafetyRingQueue) PopValues(count int) (retValues []interface{}) {
 	return t.inst.PopValues(count)
 }
 
-func (t *SafetyRingQueue) SafeExecutionWriteFunction(f func()) {
+func (t *SafetyRingQueue) ExecutionInstanceWriteMethod(f func()) {
 	t.rwMutex.Lock()
 	defer t.rwMutex.Unlock()
 	f()
 }
 
-func (t *SafetyRingQueue) SafeExecutionReadFunction(f func()) {
+func (t *SafetyRingQueue) ExecutionInstanceReadMethod(f func()) {
 	t.rwMutex.RLock()
 	defer t.rwMutex.RUnlock()
 	f()

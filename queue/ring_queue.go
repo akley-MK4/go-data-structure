@@ -68,7 +68,7 @@ func (t *RingQueue) PushValues(values ...interface{}) error {
 	return nil
 }
 
-func (t *RingQueue) PushValuesWithCheck(values ...interface{}) (retPushedCount int) {
+func (t *RingQueue) PushValuesWithoutCheck(values ...interface{}) (retPushedCount int) {
 	for _, value := range values {
 		if err := t.PushValue(value); err != nil {
 			return
@@ -97,6 +97,56 @@ func (t *RingQueue) PopValues(count int) (retValues []interface{}) {
 			return
 		}
 		retValues = append(retValues, value)
+	}
+
+	return
+}
+
+func (t *RingQueue) PopValuesListSpace(ptrListSpace *[]any) (retCount int, retErr error) {
+	if ptrListSpace == nil {
+		retErr = errors.New("the parameter listSpace is a nil value")
+		return
+	}
+
+	listSpace := *ptrListSpace
+	listSpaceLen := len(listSpace)
+	if listSpaceLen > 0 {
+		for i := 0; i < listSpaceLen; i++ {
+			val, valid := t.PopValue()
+			if !valid {
+				return
+			}
+
+			listSpace[i] = val
+			retCount += 1
+		}
+		return
+	}
+
+	listSpaceCap := cap(listSpace)
+	if listSpaceCap <= 0 {
+		retErr = errors.New("the capacity of the parameter listSpace is 0")
+		return
+	}
+
+	for i := 0; i < listSpaceCap; i++ {
+		val, valid := t.PopValue()
+		if !valid {
+			return
+		}
+
+		*ptrListSpace = append(*ptrListSpace, val)
+		retCount += 1
+	}
+
+	return
+}
+
+func (t *RingQueue) CountNonNilValueNum() (retNum int) {
+	for _, v := range t.values {
+		if v != nil {
+			retNum += 1
+		}
 	}
 
 	return

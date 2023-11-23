@@ -14,20 +14,16 @@ type IDeque interface {
 
 	PushValueToBack(value any) error
 	PushValuesToBack(values ...any) error
-	PushValuesToBackWithoutCheck(values ...any) (retPushedCount int)
 	PushValueToFront(value any) error
 	PushValuesToFront(values ...any) error
-	PushValuesToFrontWithoutCheck(values ...any) (retPushedCount int)
 
 	PopValueFromFront() (any, bool)
 	PopValuesFromFront(count int) (retValues []any)
-	PopValuesFromFrontToListSpace(ptrListSpace *[]any) (retCount int, retErr error)
 	PopValueFromBack() (any, bool)
 	PopValuesFromBack(count int) (retValues []any)
-	PopValuesFromBackToListSpace(ptrListSpace *[]any) (retCount int, retErr error)
 }
 
-func NewSafetyDeque(newDequeFunc func() IDeque) (IDeque, error) {
+func NewSafetyDeque(newDequeFunc func() IDeque) (*SafetyDeque, error) {
 	inst := newDequeFunc()
 	if inst == nil {
 		return nil, errors.New("the created deque instance is a nil value")
@@ -96,14 +92,6 @@ func (t *SafetyDeque) PushValuesToBack(values ...any) error {
 	return t.inst.PushValuesToBack(values...)
 }
 
-func (t *SafetyDeque) PushValuesToBackWithoutCheck(values ...any) (retPushedCount int) {
-	t.rwMutex.Lock()
-	defer t.rwMutex.Unlock()
-
-	retPushedCount = t.inst.PushValuesToBackWithoutCheck(values...)
-	return
-}
-
 func (t *SafetyDeque) PushValueToFront(value any) error {
 	t.rwMutex.Lock()
 	defer t.rwMutex.Unlock()
@@ -116,13 +104,6 @@ func (t *SafetyDeque) PushValuesToFront(values ...any) error {
 	defer t.rwMutex.Unlock()
 
 	return t.inst.PushValuesToFront(values...)
-}
-
-func (t *SafetyDeque) PushValuesToFrontWithoutCheck(values ...any) (retPushedCount int) {
-	t.rwMutex.Lock()
-	defer t.rwMutex.Unlock()
-
-	return t.inst.PushValuesToFrontWithoutCheck(values...)
 }
 
 func (t *SafetyDeque) PopValueFromFront() (any, bool) {
@@ -139,13 +120,6 @@ func (t *SafetyDeque) PopValuesFromFront(count int) (retValues []any) {
 	return t.inst.PopValuesFromFront(count)
 }
 
-func (t *SafetyDeque) PopValuesFromFrontToListSpace(ptrListSpace *[]any) (retCount int, retErr error) {
-	t.rwMutex.Lock()
-	defer t.rwMutex.Unlock()
-
-	return t.inst.PopValuesFromFrontToListSpace(ptrListSpace)
-}
-
 func (t *SafetyDeque) PopValueFromBack() (any, bool) {
 	t.rwMutex.Lock()
 	defer t.rwMutex.Unlock()
@@ -160,21 +134,13 @@ func (t *SafetyDeque) PopValuesFromBack(count int) (retValues []any) {
 	return t.inst.PopValuesFromBack(count)
 }
 
-func (t *SafetyDeque) PopValuesFromBackToListSpace(ptrListSpace *[]any) (retCount int, retErr error) {
+func (t *SafetyDeque) ExecutionInstanceWriteMethod(f func()) {
 	t.rwMutex.Lock()
 	defer t.rwMutex.Unlock()
-
-	return t.inst.PopValuesFromBackToListSpace(ptrListSpace)
-}
-
-func (t *SafetyDeque) SafeExecutionWriteFunction(f func()) {
-	t.rwMutex.Lock()
-	defer t.rwMutex.Unlock()
-
 	f()
 }
 
-func (t *SafetyDeque) SafeExecutionReadFunction(f func()) {
+func (t *SafetyDeque) ExecutionInstanceReadMethod(f func()) {
 	t.rwMutex.RLock()
 	defer t.rwMutex.RUnlock()
 	f()

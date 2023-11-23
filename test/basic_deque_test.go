@@ -201,3 +201,67 @@ func TestSafetyLinkListDequePushValues_4(t *testing.T) {
 		return
 	}
 }
+
+func TestSafetyLinkListDequePushValues_5(t *testing.T) {
+	safetyQueue, newQueueErr := queue.NewSafetyDeque(func() queue.IDeque {
+		return queue.NewLinkListDeque(-1)
+	})
+	if newQueueErr != nil {
+		t.Errorf("Failed to create a safety dual end queue, %v", newQueueErr)
+		return
+	}
+
+	var elemValues []interface{}
+	for i := 0; i < dequeElemValuesLen; i++ {
+		elemValues = append(elemValues, i)
+	}
+
+	if err := safetyQueue.PushValuesToBack(elemValues...); err != nil {
+		t.Errorf("Failed to push the value to queue back, %v", err)
+		return
+	}
+
+	queueInst := safetyQueue.GetQueueInstance().(*queue.LinkListDeque)
+	popListSpace := make([]interface{}, dequeElemValuesLen)
+	safetyQueue.ExecutionInstanceWriteMethod(func() {
+		poppedCount, popErr := queueInst.PopValuesFromFrontToListSpace(&popListSpace)
+		if popErr != nil {
+			t.Errorf("Failed to pop values to list space, %v", popErr)
+			return
+		}
+		popListSpace = popListSpace[:poppedCount]
+	})
+
+	for idx, v := range popListSpace {
+		if v != elemValues[idx] {
+			t.Error("The pop-up value does not match the result")
+			return
+		}
+	}
+
+	if err := safetyQueue.PushValuesToBack(elemValues...); err != nil {
+		t.Errorf("Failed to push the value to queue back, %v", err)
+		return
+	}
+	popListSpace = make([]interface{}, 0, dequeElemValuesLen)
+	safetyQueue.ExecutionInstanceWriteMethod(func() {
+		poppedCount, popErr := queueInst.PopValuesFromFrontToListSpace(&popListSpace)
+		if popErr != nil {
+			t.Errorf("Failed to pop values to list space, %v", popErr)
+			return
+		}
+		popListSpace = popListSpace[:poppedCount]
+	})
+
+	for idx, v := range popListSpace {
+		if v != elemValues[idx] {
+			t.Error("The pop-up value does not match the result")
+			return
+		}
+	}
+
+	if safetyQueue.GetLength() > 0 {
+		t.Error("Not all queue elements popped up")
+		return
+	}
+}
