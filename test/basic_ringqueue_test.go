@@ -127,17 +127,13 @@ func TestSafetyRingQueuePushValues_3(t *testing.T) {
 		}
 	}
 
-	queueInst := safetyQueue.GetQueueInstance().(*queue.RingQueue)
-
 	popListSpace := make([]interface{}, 0, ringQueueElemValuesLen-1)
-	safetyQueue.ExecutionInstanceWriteMethod(func() {
-		poppedCount, popErr := queueInst.PopValuesListSpace(&popListSpace)
-		if popErr != nil {
-			t.Errorf("Failed to pop values to list space, %v", popErr)
-			return
-		}
-		popListSpace = popListSpace[:poppedCount]
-	})
+	poppedCount, popErr := safetyQueue.PopValuesToListSpace(&popListSpace)
+	if popErr != nil {
+		t.Errorf("Failed to pop values to list space, %v", popErr)
+		return
+	}
+	popListSpace = popListSpace[:poppedCount]
 
 	for idx, v := range popListSpace {
 		if v != elemValues[idx] {
@@ -152,14 +148,12 @@ func TestSafetyRingQueuePushValues_3(t *testing.T) {
 	}
 
 	popListSpace = make([]interface{}, ringQueueElemValuesLen-1)
-	safetyQueue.ExecutionInstanceWriteMethod(func() {
-		poppedCount, popErr := queueInst.PopValuesListSpace(&popListSpace)
-		if popErr != nil {
-			t.Errorf("Failed to pop values to list space, %v", popErr)
-			return
-		}
-		popListSpace = popListSpace[:poppedCount]
-	})
+	poppedCount, popErr = safetyQueue.PopValuesToListSpace(&popListSpace)
+	if popErr != nil {
+		t.Errorf("Failed to pop values to list space, %v", popErr)
+		return
+	}
+	popListSpace = popListSpace[:poppedCount]
 
 	for idx, v := range popListSpace {
 		if v != elemValues[idx] {
@@ -173,6 +167,7 @@ func TestSafetyRingQueuePushValues_3(t *testing.T) {
 		return
 	}
 
+	queueInst := safetyQueue.GetQueueInstance().(*queue.RingQueue)
 	safetyQueue.ExecutionInstanceReadMethod(func() {
 		if queueInst.CountNonNilValueNum() > 0 {
 			t.Error("There are still non empty elements in the queue")
@@ -207,14 +202,12 @@ func TestSafetyRingQueuePushValues_4(t *testing.T) {
 	}
 
 	popListSpace := make([]interface{}, ringQueueElemValuesLen)
-	safetyQueue.ExecutionInstanceWriteMethod(func() {
-		poppedCount, popErr := queueInst.PopValuesListSpace(&popListSpace)
-		if popErr != nil {
-			t.Errorf("Failed to pop values to list space, %v", popErr)
-			return
-		}
-		popListSpace = popListSpace[:poppedCount]
-	})
+	poppedCount, popErr := safetyQueue.PopValuesToListSpace(&popListSpace)
+	if popErr != nil {
+		t.Errorf("Failed to pop values to list space, %v", popErr)
+		return
+	}
+	popListSpace = popListSpace[:poppedCount]
 
 	for idx, v := range popListSpace {
 		if v != elemValues[idx] {

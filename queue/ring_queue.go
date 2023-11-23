@@ -102,7 +102,7 @@ func (t *RingQueue) PopValues(count int) (retValues []interface{}) {
 	return
 }
 
-func (t *RingQueue) PopValuesListSpace(ptrListSpace *[]any) (retCount int, retErr error) {
+func (t *RingQueue) PopValuesToListSpace(ptrListSpace *[]any) (retCount int, retErr error) {
 	if ptrListSpace == nil {
 		retErr = errors.New("the parameter listSpace is a nil value")
 		return
