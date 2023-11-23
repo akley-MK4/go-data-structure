@@ -142,6 +142,24 @@ func (t *RingQueue) PopValuesToListSpace(ptrListSpace *[]any) (retCount int, ret
 	return
 }
 
+func (t *RingQueue) PopValuesToFunction(count int, f func(value interface{}) bool) (retErr error) {
+	if f == nil {
+		return errors.New("the parameter f is a nil value")
+	}
+
+	for i := 0; i < count; i++ {
+		value, valid := t.PopValue()
+		if !valid {
+			return
+		}
+		if !f(value) {
+			return
+		}
+	}
+
+	return
+}
+
 func (t *RingQueue) CountNonNilValueNum() (retNum int) {
 	for _, v := range t.values {
 		if v != nil {

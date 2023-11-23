@@ -229,3 +229,48 @@ func TestSafetyRingQueuePushValues_4(t *testing.T) {
 	})
 
 }
+
+func TestSafetyRingQueuePushValues_5(t *testing.T) {
+	ringQueueCapacitySize := 30
+	ringQueueElemValuesLen := ringQueueCapacitySize - 1
+
+	safetyQueue, newQueueErr := queue.NewSafetyRingDeque(func() queue.IRingQueue {
+		return queue.NewRingQueue(ringQueueCapacitySize)
+	})
+	if newQueueErr != nil {
+		t.Errorf("Failed to create a safety ring queue, %v", newQueueErr)
+		return
+	}
+
+	var elemValues []interface{}
+	for i := 0; i < ringQueueElemValuesLen; i++ {
+		elemValues = append(elemValues, i)
+	}
+
+	if err := safetyQueue.PushValues(elemValues...); err != nil {
+		t.Errorf("Failed to push values to the ring queue, %v", err)
+		return
+	}
+
+	var poppedCount int
+	poppedListSpace := make([]int, len(elemValues))
+	if err := safetyQueue.PopValuesToFunction(len(elemValues), func(value interface{}) bool {
+		poppedListSpace[poppedCount] = value.(int)
+		poppedCount += 1
+		return true
+	}); err != nil {
+		t.Errorf("Failed to pop values to function, %v", err)
+		return
+	}
+
+	if poppedCount != len(poppedListSpace) {
+		t.Error("The pop-up value does not match the result")
+		return
+	}
+
+	queueInst := safetyQueue.GetQueueInstance().(*queue.RingQueue)
+	if queueInst.CountNonNilValueNum() > 0 {
+		t.Error("There are still non empty elements in the queue")
+		return
+	}
+}
