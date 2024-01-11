@@ -61,10 +61,14 @@ func TestSafetyRingQueuePushValues_1(t *testing.T) {
 
 	queueInst := safetyQueue.GetQueueInstance().(*queue.RingQueue)
 	safetyQueue.ExecutionInstanceReadMethod(func() {
-		if queueInst.CountNonNilValueNum() > 0 {
-			t.Error("There are still non empty elements in the queue")
-			return
-		}
+		queueInst.ScanElements(
+			func(value interface{}) bool {
+				if value != nil {
+					t.Error("There are still non empty elements in the queue")
+					return false
+				}
+				return true
+			})
 	})
 }
 
@@ -169,10 +173,14 @@ func TestSafetyRingQueuePushValues_3(t *testing.T) {
 
 	queueInst := safetyQueue.GetQueueInstance().(*queue.RingQueue)
 	safetyQueue.ExecutionInstanceReadMethod(func() {
-		if queueInst.CountNonNilValueNum() > 0 {
-			t.Error("There are still non empty elements in the queue")
-			return
-		}
+		queueInst.ScanElements(
+			func(value interface{}) bool {
+				if value != nil {
+					t.Error("There are still non empty elements in the queue")
+					return false
+				}
+				return true
+			})
 	})
 }
 
@@ -222,10 +230,14 @@ func TestSafetyRingQueuePushValues_4(t *testing.T) {
 	}
 
 	safetyQueue.ExecutionInstanceReadMethod(func() {
-		if queueInst.CountNonNilValueNum() > 0 {
-			t.Error("There are still non empty elements in the queue")
-			return
-		}
+		queueInst.ScanElements(
+			func(value interface{}) bool {
+				if value != nil {
+					t.Error("There are still non empty elements in the queue")
+					return false
+				}
+				return true
+			})
 	})
 
 }
@@ -269,8 +281,12 @@ func TestSafetyRingQueuePushValues_5(t *testing.T) {
 	}
 
 	queueInst := safetyQueue.GetQueueInstance().(*queue.RingQueue)
-	if queueInst.CountNonNilValueNum() > 0 {
-		t.Error("There are still non empty elements in the queue")
-		return
-	}
+	queueInst.ScanElements(
+		func(value interface{}) bool {
+			if value != nil {
+				t.Error("There are still non empty elements in the queue")
+				return false
+			}
+			return true
+		})
 }

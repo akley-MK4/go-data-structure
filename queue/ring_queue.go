@@ -160,12 +160,14 @@ func (t *RingQueue) PopValuesWithFilterFunction(f func(value interface{}) bool) 
 	return
 }
 
-func (t *RingQueue) CountNonNilValueNum() (retNum int) {
-	for _, v := range t.values {
-		if v != nil {
-			retNum += 1
-		}
+func (t *RingQueue) ScanElements(f func(value interface{}) bool) error {
+	if f == nil {
+		return errors.New("the parameter f is a nil value")
 	}
 
-	return
+	for _, v := range t.values {
+		f(v)
+	}
+
+	return nil
 }
