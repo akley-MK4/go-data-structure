@@ -15,7 +15,7 @@ type IRingQueue interface {
 	PopValue() (interface{}, bool)
 	PopValues(count int) (retValues []interface{})
 	PopValuesToListSpace(ptrListSpace *[]any) (retCount int, retErr error)
-	PopValuesToFunction(count int, f func(value interface{}) bool) (retErr error)
+	PopValuesWithFilterFunction(f func(value interface{}) bool) (retErr error)
 }
 
 func NewSafetyRingDeque(newDequeFunc func() IRingQueue) (*SafetyRingQueue, error) {
@@ -92,10 +92,10 @@ func (t *SafetyRingQueue) PopValuesToListSpace(ptrListSpace *[]any) (retCount in
 	return t.inst.PopValuesToListSpace(ptrListSpace)
 }
 
-func (t *SafetyRingQueue) PopValuesToFunction(count int, f func(value interface{}) bool) (retErr error) {
+func (t *SafetyRingQueue) PopValuesWithFilterFunction(f func(value interface{}) bool) (retErr error) {
 	t.rwMutex.Lock()
 	defer t.rwMutex.Unlock()
-	return t.inst.PopValuesToFunction(count, f)
+	return t.inst.PopValuesWithFilterFunction(f)
 }
 
 func (t *SafetyRingQueue) ExecutionInstanceWriteMethod(f func()) {

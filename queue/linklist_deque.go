@@ -192,6 +192,23 @@ func (t *LinkListDeque) PopValuesFromFrontToListSpace(ptrListSpace *[]any) (retC
 	return
 }
 
+func (t *LinkListDeque) PopValuesFromFrontWithFilterFunction(f func(value interface{}) bool) (retErr error) {
+	if f == nil {
+		return errors.New("the parameter f is a nil value")
+	}
+
+	for {
+		value, valid := t.PopValueFromFront()
+		if !valid {
+			return
+		}
+		if !f(value) {
+			return
+		}
+	}
+	return
+}
+
 func (t *LinkListDeque) PopValueFromBack() (any, bool) {
 	valuesLen := t.list.Len()
 	if valuesLen <= 0 {
@@ -263,6 +280,23 @@ func (t *LinkListDeque) PopValuesFromBackToListSpace(ptrListSpace *[]any) (retCo
 		retCount += 1
 	}
 
+	return
+}
+
+func (t *LinkListDeque) PopValuesFromBackWithFilterFunction(f func(value interface{}) bool) (retErr error) {
+	if f == nil {
+		return errors.New("the parameter f is a nil value")
+	}
+
+	for {
+		value, valid := t.PopValueFromBack()
+		if !valid {
+			return
+		}
+		if !f(value) {
+			return
+		}
+	}
 	return
 }
 

@@ -19,8 +19,10 @@ type IDeque interface {
 
 	PopValueFromFront() (any, bool)
 	PopValuesFromFront(count int) (retValues []any)
+	PopValuesFromFrontWithFilterFunction(f func(value interface{}) bool) (retErr error)
 	PopValueFromBack() (any, bool)
 	PopValuesFromBack(count int) (retValues []any)
+	PopValuesFromBackWithFilterFunction(f func(value interface{}) bool) (retErr error)
 }
 
 func NewSafetyDeque(newDequeFunc func() IDeque) (*SafetyDeque, error) {
@@ -120,6 +122,12 @@ func (t *SafetyDeque) PopValuesFromFront(count int) (retValues []any) {
 	return t.inst.PopValuesFromFront(count)
 }
 
+func (t *SafetyDeque) PopValuesFromFrontWithFilterFunction(f func(value interface{}) bool) (retErr error) {
+	t.rwMutex.Lock()
+	defer t.rwMutex.Unlock()
+	return t.inst.PopValuesFromFrontWithFilterFunction(f)
+}
+
 func (t *SafetyDeque) PopValueFromBack() (any, bool) {
 	t.rwMutex.Lock()
 	defer t.rwMutex.Unlock()
@@ -132,6 +140,12 @@ func (t *SafetyDeque) PopValuesFromBack(count int) (retValues []any) {
 	defer t.rwMutex.Unlock()
 
 	return t.inst.PopValuesFromBack(count)
+}
+
+func (t *SafetyDeque) PopValuesFromBackWithFilterFunction(f func(value interface{}) bool) (retErr error) {
+	t.rwMutex.Lock()
+	defer t.rwMutex.Unlock()
+	return t.PopValuesFromBackWithFilterFunction(f)
 }
 
 func (t *SafetyDeque) ExecutionInstanceWriteMethod(f func()) {

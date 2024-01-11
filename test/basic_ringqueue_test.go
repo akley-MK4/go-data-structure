@@ -254,10 +254,10 @@ func TestSafetyRingQueuePushValues_5(t *testing.T) {
 
 	var poppedCount int
 	poppedListSpace := make([]int, len(elemValues))
-	if err := safetyQueue.PopValuesToFunction(len(elemValues), func(value interface{}) bool {
+	if err := safetyQueue.PopValuesWithFilterFunction(func(value interface{}) bool {
 		poppedListSpace[poppedCount] = value.(int)
 		poppedCount += 1
-		return true
+		return poppedCount < len(poppedListSpace)
 	}); err != nil {
 		t.Errorf("Failed to pop values to function, %v", err)
 		return
