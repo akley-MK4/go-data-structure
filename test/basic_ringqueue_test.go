@@ -60,7 +60,7 @@ func TestSafetyRingQueuePushValues_1(t *testing.T) {
 	}
 
 	queueInst := safetyQueue.GetQueueInstance().(*queue.RingQueue)
-	safetyQueue.ExecutionInstanceReadMethod(func() {
+	safetyQueue.ExecuteReadMethod(func() {
 		queueInst.ScanElements(
 			func(value interface{}) bool {
 				if value != nil {
@@ -172,7 +172,7 @@ func TestSafetyRingQueuePushValues_3(t *testing.T) {
 	}
 
 	queueInst := safetyQueue.GetQueueInstance().(*queue.RingQueue)
-	safetyQueue.ExecutionInstanceReadMethod(func() {
+	safetyQueue.ExecuteReadMethod(func() {
 		queueInst.ScanElements(
 			func(value interface{}) bool {
 				if value != nil {
@@ -229,7 +229,7 @@ func TestSafetyRingQueuePushValues_4(t *testing.T) {
 		return
 	}
 
-	safetyQueue.ExecutionInstanceReadMethod(func() {
+	safetyQueue.ExecuteReadMethod(func() {
 		queueInst.ScanElements(
 			func(value interface{}) bool {
 				if value != nil {

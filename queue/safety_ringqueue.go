@@ -98,13 +98,13 @@ func (t *SafetyRingQueue) PopValuesWithFilterFunction(f func(value interface{}) 
 	return t.inst.PopValuesWithFilterFunction(f)
 }
 
-func (t *SafetyRingQueue) ExecutionInstanceWriteMethod(f func()) {
+func (t *SafetyRingQueue) ExecuteWriteMethod(f func()) {
 	t.rwMutex.Lock()
 	defer t.rwMutex.Unlock()
 	f()
 }
 
-func (t *SafetyRingQueue) ExecutionInstanceReadMethod(f func()) {
+func (t *SafetyRingQueue) ExecuteReadMethod(f func()) {
 	t.rwMutex.RLock()
 	defer t.rwMutex.RUnlock()
 	f()

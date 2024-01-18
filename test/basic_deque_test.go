@@ -223,7 +223,7 @@ func TestSafetyLinkListDequePushValues_5(t *testing.T) {
 
 	queueInst := safetyQueue.GetQueueInstance().(*queue.LinkListDeque)
 	popListSpace := make([]interface{}, dequeElemValuesLen)
-	safetyQueue.ExecutionInstanceWriteMethod(func() {
+	safetyQueue.ExecuteWriteMethod(func() {
 		poppedCount, popErr := queueInst.PopValuesFromFrontToListSpace(&popListSpace)
 		if popErr != nil {
 			t.Errorf("Failed to pop values to list space, %v", popErr)
@@ -244,7 +244,7 @@ func TestSafetyLinkListDequePushValues_5(t *testing.T) {
 		return
 	}
 	popListSpace = make([]interface{}, 0, dequeElemValuesLen)
-	safetyQueue.ExecutionInstanceWriteMethod(func() {
+	safetyQueue.ExecuteWriteMethod(func() {
 		poppedCount, popErr := queueInst.PopValuesFromFrontToListSpace(&popListSpace)
 		if popErr != nil {
 			t.Errorf("Failed to pop values to list space, %v", popErr)

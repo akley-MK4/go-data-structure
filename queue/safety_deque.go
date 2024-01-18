@@ -148,13 +148,13 @@ func (t *SafetyDeque) PopValuesFromBackWithFilterFunction(f func(value interface
 	return t.PopValuesFromBackWithFilterFunction(f)
 }
 
-func (t *SafetyDeque) ExecutionInstanceWriteMethod(f func()) {
+func (t *SafetyDeque) ExecuteWriteMethod(f func()) {
 	t.rwMutex.Lock()
 	defer t.rwMutex.Unlock()
 	f()
 }
 
-func (t *SafetyDeque) ExecutionInstanceReadMethod(f func()) {
+func (t *SafetyDeque) ExecuteReadMethod(f func()) {
 	t.rwMutex.RLock()
 	defer t.rwMutex.RUnlock()
 	f()
