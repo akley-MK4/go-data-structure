@@ -68,10 +68,32 @@ func (t *SafetyRingQueue) PushValue(value interface{}) error {
 	return t.inst.PushValue(value)
 }
 
+func (t *SafetyRingQueue) PushValueAndRetLength(value interface{}) (retLen int, retErr error) {
+	t.rwMutex.Lock()
+	defer t.rwMutex.Unlock()
+
+	if retErr = t.inst.PushValue(value); retErr != nil {
+		return
+	}
+	retLen = t.inst.GetLength()
+	return
+}
+
 func (t *SafetyRingQueue) PushValues(values ...interface{}) error {
 	t.rwMutex.Lock()
 	defer t.rwMutex.Unlock()
 	return t.inst.PushValues(values...)
+}
+
+func (t *SafetyRingQueue) PushValuesAndRetLength(values ...interface{}) (retLen int, retErr error) {
+	t.rwMutex.Lock()
+	defer t.rwMutex.Unlock()
+
+	if retErr = t.inst.PushValues(values...); retErr != nil {
+		return
+	}
+	retLen = t.inst.GetLength()
+	return
 }
 
 func (t *SafetyRingQueue) PopValue() (interface{}, bool) {
@@ -80,10 +102,28 @@ func (t *SafetyRingQueue) PopValue() (interface{}, bool) {
 	return t.inst.PopValue()
 }
 
+func (t *SafetyRingQueue) PopValueAndRetLength() (retVal interface{}, retOk bool, retLen int) {
+	t.rwMutex.Lock()
+	defer t.rwMutex.Unlock()
+
+	retVal, retOk = t.inst.PopValue()
+	retLen = t.inst.GetLength()
+	return
+}
+
 func (t *SafetyRingQueue) PopValues(count int) (retValues []interface{}) {
 	t.rwMutex.Lock()
 	defer t.rwMutex.Unlock()
 	return t.inst.PopValues(count)
+}
+
+func (t *SafetyRingQueue) PopValuesAndRetLength(count int) (retValues []interface{}, retLen int) {
+	t.rwMutex.Lock()
+	defer t.rwMutex.Unlock()
+
+	retValues = t.inst.PopValues(count)
+	retLen = t.inst.GetLength()
+	return
 }
 
 func (t *SafetyRingQueue) PopValuesToListSpace(ptrListSpace *[]any) (retCount int, retErr error) {
